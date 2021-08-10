@@ -1,0 +1,9 @@
+name: PlayerTablistName
+version: ${project.version}
+main: me.hsgamer.playertablistname.PlayerTablistName
+api-version: 1.13
+depend:
+  - ProtocolLib
+softdepend:
+  - PlaceholderAPI
+authors: [ HSGamer ]
