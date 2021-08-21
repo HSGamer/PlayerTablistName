@@ -26,12 +26,11 @@ import java.util.stream.Collectors;
 
 import static com.comphenix.protocol.ProtocolLibrary.getProtocolManager;
 
-@SuppressWarnings("unused")
 public final class PlayerTablistName extends JavaPlugin {
     private String tabName = "&e{player}";
     private long updatePeriod = 40;
     private boolean hasPlaceholderAPI;
-    private final PacketAdapter adapter = new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.PLAYER_INFO) {
+    private final PacketAdapter adapter = new PacketAdapter(this, ListenerPriority.LOWEST, PacketType.Play.Server.PLAYER_INFO) {
         @Override
         public void onPacketSending(PacketEvent event) {
             if (tabName.isEmpty()) {
