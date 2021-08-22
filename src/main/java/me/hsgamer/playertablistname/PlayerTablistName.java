@@ -53,7 +53,10 @@ public final class PlayerTablistName extends JavaPlugin {
             if (isCancelled()) {
                 return;
             }
-            Collection<Player> players = Bukkit.getOnlinePlayers().stream().filter(OfflinePlayer::isOnline).collect(Collectors.toList());
+            Collection<Player> players = Bukkit.getOnlinePlayers().stream()
+                    .filter(OfflinePlayer::isOnline)
+                    .filter(player -> !player.hasMetadata("NPC"))
+                    .collect(Collectors.toList());
             if (players.isEmpty()) {
                 return;
             }
