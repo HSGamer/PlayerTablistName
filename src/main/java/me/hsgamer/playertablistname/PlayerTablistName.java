@@ -13,12 +13,12 @@ import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,8 +41,8 @@ public final class PlayerTablistName extends JavaPlugin {
             StructureModifier<List<PlayerInfoData>> modifier = packet.getPlayerInfoDataLists();
             List<PlayerInfoData> list = modifier.read(0);
             list.replaceAll(playerInfoData -> {
-                String displayName = MessageUtils.colorize(replaceString(playerInfoData.getProfile()));
-                return new PlayerInfoData(playerInfoData.getProfile(), playerInfoData.getLatency(), playerInfoData.getGameMode(), WrappedChatComponent.fromLegacyText(displayName));
+                String displayName = replaceString(playerInfoData.getProfile());
+                return new PlayerInfoData(playerInfoData.getProfile(), playerInfoData.getLatency(), playerInfoData.getGameMode(), displayName != null ? WrappedChatComponent.fromLegacyText(displayName) : null);
             });
             modifier.write(0, list);
         }
@@ -53,10 +53,7 @@ public final class PlayerTablistName extends JavaPlugin {
             if (isCancelled()) {
                 return;
             }
-            Collection<Player> players = Bukkit.getOnlinePlayers().stream()
-                    .filter(OfflinePlayer::isOnline)
-                    .filter(player -> !player.hasMetadata("NPC"))
-                    .collect(Collectors.toList());
+            Collection<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
             if (players.isEmpty()) {
                 return;
             }
@@ -75,7 +72,8 @@ public final class PlayerTablistName extends JavaPlugin {
 
         private PlayerInfoData constructInfo(Player player) {
             WrappedGameProfile profile = WrappedGameProfile.fromPlayer(player);
-            return new PlayerInfoData(profile, 0, EnumWrappers.NativeGameMode.fromBukkit(player.getGameMode()), WrappedChatComponent.fromLegacyText(replaceString(profile)));
+            String displayName = replaceString(profile);
+            return new PlayerInfoData(profile, 0, EnumWrappers.NativeGameMode.fromBukkit(player.getGameMode()), displayName != null ? WrappedChatComponent.fromLegacyText(displayName) : null);
         }
     };
 
@@ -105,15 +103,16 @@ public final class PlayerTablistName extends JavaPlugin {
 
     private String replaceString(WrappedGameProfile profile) {
         if (tabName.isEmpty()) {
-            return profile.getName();
+            return null;
+        }
+        Player player = Bukkit.getPlayer(profile.getName());
+        if (player == null) {
+            return null;
         }
         String string = tabName.replace("{player}", profile.getName());
         if (hasPlaceholderAPI) {
-            Player player = Bukkit.getPlayer(profile.getName());
-            if (player != null) {
-                string = PlaceholderAPI.setPlaceholders(player, string);
-            }
+            string = PlaceholderAPI.setPlaceholders(player, string);
         }
-        return string;
+        return MessageUtils.colorize(string);
     }
 }
