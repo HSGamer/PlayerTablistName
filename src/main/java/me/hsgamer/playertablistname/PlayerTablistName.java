@@ -17,11 +17,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static com.comphenix.protocol.ProtocolLibrary.getProtocolManager;
@@ -61,13 +59,7 @@ public final class PlayerTablistName extends JavaPlugin {
             PacketContainer container = getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO, true);
             container.getPlayerInfoDataLists().writeSafely(0, data);
             container.getPlayerInfoAction().writeSafely(0, EnumWrappers.PlayerInfoAction.UPDATE_DISPLAY_NAME);
-            players.parallelStream().forEach(player -> {
-                try {
-                    getProtocolManager().sendServerPacket(player, container, false);
-                } catch (InvocationTargetException e) {
-                    getLogger().log(Level.WARNING, "Cannot send update display name packet to the player", e);
-                }
-            });
+            players.parallelStream().forEach(player -> getProtocolManager().sendServerPacket(player, container, false));
         }
 
         private PlayerInfoData constructInfo(Player player) {
